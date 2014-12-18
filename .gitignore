@@ -1,0 +1,4 @@
+node_modules
+example/bower_components
+js/board.js
+js/utils.js

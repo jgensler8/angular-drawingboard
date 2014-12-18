@@ -1,0 +1,24 @@
+{
+  "name": "angular-drawingboard",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jgensler8/angular-drawingboard",
+  "authors": [
+    "Jeffrey Gensler <jgensler8@gmail.com>"
+  ],
+  "description": "port of drawingboard.js to angular",
+  "main": "js/ng-drawingboard.js",
+  "keywords": [
+    "angular",
+    "drawingboard",
+    "canvas"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "example"
+  ]
+}

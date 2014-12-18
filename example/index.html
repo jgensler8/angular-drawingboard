@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+  <meta charset="utf-8">
+  <title>ng-drawingboard example</title>
+  <meta name="description" content="">
+  
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="../js/ng-drawingboard.js"></script>
+  <script src="../example/app.js"></script>
+  
+</head>
+<body ng-app="testApp" style="background-color:cyan;">
+
+  <div ng-controller="appCtrl">
+  
+    <button ng-click="clear()">clear</button><br>
+    <button ng-click="undo()">undo</button><br>
+    <button ng-click="redo()">redo</button><br>
+    <button ng-click="getDataURL()">getIMG</button>
+    <br>
+    
+    <ng-drawingboard remote="drawingboardRemote" options="options"></ng-drawingboard>
+    
+  </div>
+  
+</body>
+</html>
