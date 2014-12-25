@@ -20,5 +20,8 @@
     "test",
     "tests",
     "example"
-  ]
+  ],
+  "dependencies": {
+    "ngstorage": "~0.3.0"
+  }
 }
