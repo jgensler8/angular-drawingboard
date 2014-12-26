@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 			},
 			dist: {
   			src: ['src/**/*.js'],
-  			dest: 'dist/concat.angular-drawingboard.js'
+  			dest: 'tmp/concat.angular-drawingboard.js'
 			}
 		},
 
@@ -35,7 +35,7 @@ module.exports = function(grunt) {
 			},
 			dist: {
 			  files: {
-				  'dist/angular-drawingboard.min.js': ['dist/concat.angular-drawingboard.js']
+				  'dist/angular-drawingboard.min.js': ['tmp/concat.angular-drawingboard.js']
 			  }
 			}
 		},
