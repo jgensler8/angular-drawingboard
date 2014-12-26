@@ -1,10 +1,6 @@
 #angular-drawingboard
 
-===
-
 Some modifications and reworkings to [drawingboard.js](https://github.com/Leimi/drawingboard.js) for use with Angular
-
-===
 
 ##Basic Use
 
@@ -51,6 +47,31 @@ app.controller('appCtrl', ['$scope', function($scope) {
 ##Controls
 
 ###`remote`
-to hook up buttons to drawingboard specific functions. Hopefully this will give a way of balancing complex scope patterns with functions that will typically be linked up to buttons anyway. This is likely to change in the future but the idea is to leave as much "ui-rigging" up to the consumer as possible.
+button hooks. Hopefully this will give a way of balancing complex scope patterns with functions that will typically be linked up to buttons anyway. This is likely to change in the future but the idea is to leave as much "ui-rigging" up to the consumer as possible.
 
-###`options`: control basic functionality of the canvas
+#### Events
+```
+{
+  on: {
+    'startDraw': function(event) ...
+    'endDraw': function(event) ...
+    'drawing': function(event) ...
+  }
+}
+```
+#### Drawing Modes
+```
+{
+  drawingMode: 'pencil' // or 'pencil' or 'fill'
+}
+```
+
+###`options`
+control basic abilities of the canvas
+
+#### History
+```
+{
+  history: undefined // or 'session' or 'local' (for storage type)
+}
+```
