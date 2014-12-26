@@ -75,3 +75,9 @@ control basic abilities of the canvas
   history: undefined // or 'session' or 'local' (for storage type)
 }
 ```
+
+===
+
+##Version History
+
+v0.1.0 - basic usage. storage not rigged up.
