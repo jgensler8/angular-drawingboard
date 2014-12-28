@@ -8,7 +8,7 @@
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/ngstorage/ngStorage.js"></script>
   <script src="app.js"></script>
-  <script src="../dist/angular-drawingboard.min.js"></script>
+  <script src="../dist/angular-drawingboard.js"></script>
   
 </head>
 <body ng-app="testApp" style="background-color:cyan;">
@@ -16,12 +16,19 @@
   <div ng-controller="appCtrl">
   
     <button ng-click="clear()">clear</button><br>
-    <button ng-click="undo()">undo</button><br>
-    <button ng-click="redo()">redo</button><br>
-    <button ng-click="getDataURL()">getIMG</button>
-    <br>
     
-    <ng-drawingboard remote="drawingboardRemote" options="options"></ng-drawingboard>
+    <button ng-click="undo()">undo</button>
+    <button ng-click="redo()">redo</button>
+    <button ng-click="clearHistory()">clearHistory</button><br>
+    
+    <button ng-click="getDataURL()">getIMG</button><br>
+    
+    Line Width: <input type='number' ng-model='lineWidth'><br>
+    Erase Color: <input type='color' ng-model='eraseColor'><br>
+    Draw Color: <input type='color' ng-model='drawColor'><br>
+    <select ng-options="item for item in drawingModes" ng-model="drawingMode"></select> Mode: {{drawingMode}}<br>
+    
+    <ng-drawingboard remote="drawingboardRemote" drawingMode="drawingMode" eraseColor="eraseColor" drawColor="drawColor" lineWidth="lineWidth" webStorage="webStorage"></ng-drawingboard>
     
   </div>
   

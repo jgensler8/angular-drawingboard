@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 			},
 			dist: {
   			src: ['src/**/*.js'],
-  			dest: 'tmp/concat.angular-drawingboard.js'
+  			dest: 'dist/angular-drawingboard.js'
 			}
 		},
 
@@ -35,13 +35,13 @@ module.exports = function(grunt) {
 			},
 			dist: {
 			  files: {
-				  'dist/angular-drawingboard.min.js': ['tmp/concat.angular-drawingboard.js']
+				  'dist/angular-drawingboard.min.js': ['dist/angular-drawingboard.js']
 			  }
 			}
 		},
 
     watch: {
-      files: ['<%= jshint.files %>'],
+      files: ['<%= jshint.files %>', 'example/**'],
       tasks: ['default']
     }
   });
