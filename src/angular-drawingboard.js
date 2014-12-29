@@ -85,7 +85,7 @@
         
         if ( webStorage === 'session') {
           if(currentImageIndex + 1 >= $sessionStorage[id].length) return false;
-          console.log("increasing");
+          
           ++currentImageIndex;
           this.setIMG(context, $sessionStorage[id][currentImageIndex]);
         }
