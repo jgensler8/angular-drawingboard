@@ -6,7 +6,10 @@ app.controller('appCtrl', ['$scope', function($scope) {
   $scope.drawingMode = 'eraser';
   $scope.drawColor = '#00FF00';
   $scope.eraseColor = '#FF00FF';
-  $scope.lineWidth = 10;
+  $scope.lineWidth = 1;
+  $scope.backgroundColor = '#F00000';
+  $scope.canvasWidth = '300';
+  $scope.canvasHeight = '300';
   
   $scope.drawingboardRemote = {
     'startDraw': function(event) {
@@ -28,7 +31,7 @@ app.controller('appCtrl', ['$scope', function($scope) {
       //console.log('erasing', event);
     },
     'fill': function(event) {
-      //console.log('filled, event);
+      console.log('filled', event);
     }
   };
   

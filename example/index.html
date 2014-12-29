@@ -11,7 +11,7 @@
   <script src="../dist/angular-drawingboard.js"></script>
   
 </head>
-<body ng-app="testApp" style="background-color:cyan;">
+<body ng-app="testApp">
 
   <div ng-controller="appCtrl">
   
@@ -26,9 +26,10 @@
     Line Width: <input type='number' ng-model='lineWidth'><br>
     Erase Color: <input type='color' ng-model='eraseColor'><br>
     Draw Color: <input type='color' ng-model='drawColor'><br>
+    Background Color: <input type='color' ng-model='backgroundColor'><br>
     <select ng-options="item for item in drawingModes" ng-model="drawingMode"></select> Mode: {{drawingMode}}<br>
     
-    <ng-drawingboard remote="drawingboardRemote" drawingMode="drawingMode" eraseColor="eraseColor" drawColor="drawColor" lineWidth="lineWidth" webStorage="webStorage"></ng-drawingboard>
+    <ng-drawingboard remote="drawingboardRemote" drawingMode="drawingMode" eraseColor="eraseColor" drawColor="drawColor" lineWidth="lineWidth" webStorage="webStorage" backgroundColor="backgroundColor" canvasWidth="canvasWidth" canvasHeight="canvasHeight" ></ng-drawingboard>
     
   </div>
   

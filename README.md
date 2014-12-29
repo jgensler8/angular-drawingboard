@@ -7,23 +7,69 @@ Some modifications and reworkings to [drawingboard.js](https://github.com/Leimi/
 Template:
 
 ```html
-<ng-drawingboard remote="drawingboardRemote" lineWidth="10"></ng-drawingboard>
+<ng-drawingboard remote="drawingboardRemote" drawingMode="drawingMode" eraseColor="eraseColor" drawColor="drawColor" lineWidth="lineWidth" webStorage="webStorage" backgroundColor="backgroundColor"></ng-drawingboard>
 ```
 
 Controller:
 
 ```javascript
 app.controller('appCtrl', ['$scope', function($scope) {
-  //TODO
+  $scope.drawingModes = ['draw', 'eraser', 'fill'];
+  $scope.webStorage = 'session';
+  $scope.drawingMode = 'eraser';
+  $scope.drawColor = '#00FF00';
+  $scope.eraseColor = '#FF00FF';
+  $scope.lineWidth = 20;
+  $scope.backgroundColor = '#F00000';
+  $scope.canvasWidth = 'parent';
+  $scope.canvasHeight = 'parent';
+  
+  $scope.drawingboardRemote = {
+    'startDraw': function(event) {
+      console.log('start drawing', event);
+    },
+    'endDraw': function(event) {
+      console.log('end drawing', event);
+    },
+    'drawing': function(event) {
+      //console.log('drawing', event);
+    },
+    'startErase': function(event) {
+      console.log('start erase', event);
+    },
+    'endErase': function(event) {
+      console.log('end erase', event);
+    },
+    'erasing': function(event) {
+      //console.log('erasing', event);
+    },
+    'fill': function(event) {
+      console.log('filled', event);
+    }
+  };
 }]);
 ```
 
-##Controls
+##Attributes
+control basic abilities of the canvas
 
-###`remote`
-button hooks. Hopefully this will give a way of balancing complex scope patterns with functions that will typically be linked up to buttons anyway. This is likely to change in the future but the idea is to leave as much "ui-rigging" up to the consumer as possible.
+```html
+<ng-drawingboard webStorage='local'></ng-drawingboard> <!-- 'local' or 'session' -->
+<ng-drawingboard drawingMode='draw'></ng-drawingboard> <!-- 'draw' or 'eraser or 'fill' -->
+<ng-drawingboard drawColor='#FFFFFF'></ng-drawingboard> <!-- hex string -->
+<ng-drawingboard eraseColor='#000000'></ng-drawingboard> <!-- hex string -->
+<ng-drawingboard lineWidth='10'></ng-drawingboard> <!-- integer -->
+<ng-drawingboard backgroundColor='#FF0000'></ng-drawingboard> <!-- hex string -->
+<ng-drawingboard canvasWidth='parent'></ng-drawingboard> <!-- integer -->
+<ng-drawingboard canvasHeight='parent'></ng-drawingboard> <!-- integer -->
+<ng-drawingboard remote='remoteObj'></ng-drawingboard> <!-- see below -->
+```
+
+####`remote`
+event hooks. Hopefully this will give a way of balancing complex scope patterns with functions that will typically be linked up to buttons anyway. This is likely to change in the future but the idea is to leave as much "ui-rigging" up to the consumer as possible.
 
 ```javascript
+//remoteObj =
 {
   'startDraw': function(event) ...
   'endDraw': function(event) ...
@@ -35,19 +81,9 @@ button hooks. Hopefully this will give a way of balancing complex scope patterns
 }
 ```
 
-###`options`
-control basic abilities of the canvas
-
-```html
-<ng-drawingboard webStorage='local'></ng-drawingboard> <!-- or 'session' -->
-<ng-drawingboard drawingMode='draw'></ng-drawingboard> <!-- or 'eraser or 'fill' -->
-<ng-drawingboard drawColor='#FFFFFF'></ng-drawingboard>
-<ng-drawingboard eraseColor='#000000'></ng-drawingboard>
-<ng-drawingboard lineWidth='10'></ng-drawingboard>
-```
-
 ===
 
-##Version History
+###Version History
 
+v0.2.0 - basic usage: colors, width, storage, drawing modes
 v0.1.0 - basic usage. storage not rigged up.

@@ -22,40 +22,54 @@
       },
       
       //storage related
-      initStorage: function(canvas, webStorage) {
+      initStorage: function(canvas, context, webStorage) {
         var id = canvas.id || 'tempID';
         //if the user decides they need storage later
-        $sessionStorage[id] = [];
-        $localStorage[id] = [];
         if (webStorage === 'session') {
-          this.save(canvas, webStorage);
+          if ($sessionStorage[id]) {
+            this.setIMG(canvas, context, $sessionStorage[id][$sessionStorage[id].length - 1]);
+            currentImageIndex = $sessionStorage[id].length - 1;
+          }
+          else {
+            $sessionStorage[id] = [];
+            this.save(canvas, webStorage);
+          }
         }
         else if (webStorage === 'local') {
-          this.save(canvas, webStorage);
+          if ($localStorage[id]) {
+            this.setIMG(canvas, context, $localStorage[id][$localStorage[id].length - 1]);
+            currentImageIndex = $localStorage[id].length - 1;
+          }
+          else {
+            $localStorage[id] = [];
+            this.save(canvas, webStorage);
+          }
         }
       },
       save: function(canvas, webStorage) {
         var id = canvas.id || 'tempID';
         
         if ( webStorage === 'session') {
+          //if we are in the middle of the history
           if( currentImageIndex < $sessionStorage[id].length)
-            $sessionStorage[id].slice(currentImageIndex + 1, $sessionStorage[id].length);
+            $sessionStorage[id].splice(currentImageIndex + 1, $sessionStorage[id].length - currentImageIndex);
             
           currentImageIndex = $sessionStorage[id].length;
-          $sessionStorage[id].push(this.toDataURL(canvas, 'image/png'));
-          ++currentImageIndex;
+          var history = $sessionStorage[id];
+          history.push(this.toDataURL(canvas, 'image/png'));
+          $sessionStorage[id] = history;
         }
         else if ( webStorage === 'local') {
+          //if we are in the middle of the history
           if( currentImageIndex < $localStorage[id].length)
-            $localStorage[id].slice(currentImageIndex + 1, $localStorage[id].length);
+            $localStorage[id].splice(currentImageIndex + 1, $localStorage[id].length - currentImageIndex);
             
           currentImageIndex = $localStorage[id].length;
           $localStorage[id].push(this.toDataURL(canvas, 'image/png'));
-          ++currentImageIndex;
         }
       },
       undo: function(canvas, context, webStorage) {
-        if(currentImageIndex <= 0) return;
+        if(currentImageIndex <= 0) return false;
         var id = canvas.id || 'tempID';
         
         if ( webStorage === 'session') {
@@ -66,47 +80,103 @@
           --currentImageIndex;
           this.setIMG(canvas, context, $localStorage[id][currentImageIndex]);
         }
+        return true;
       },
       redo: function(canvas, context, webStorage) {
         var id = canvas.id || 'tempID';
         
         if ( webStorage === 'session') {
-          if(currentImageIndex >= $sessionStorage[id].length) return;
+          if(currentImageIndex + 1 >= $sessionStorage[id].length) return false;
           
-          --currentImageIndex;
+          ++currentImageIndex;
           this.setIMG(canvas, context, $sessionStorage[id][currentImageIndex]);
         }
         else if ( webStorage === 'local') {
-          if(currentImageIndex >= $localStorage[id].length) return;
+          if(currentImageIndex + 1 >= $localStorage[id].length) return false;
           
-          --currentImageIndex;
+          ++currentImageIndex;
           this.setIMG(canvas, context, $localStorage[id][currentImageIndex]);
         }
+        return true;
       },
-      clearStorage: function(canvas, webStorage) {
-        if ( webStorage === 'session') {
-          $sessionStorage.$reset();
-        }
-        else if ( webStorage === 'local') {
-          $localStorage.$reset();
-        }
+      clearStorage: function(canvas, context, webStorage) {
+        return this.initStorage(canvas, context, webStorage);
       },
       
       //drawing related
+      initBackground: function(context, backgroundColor, canvasWidth, canvasHeight, parent) {
+        if(canvasWidth === 'parent') context.canvas.width = parent.offsetWidth;
+        else context.canvas.width = canvasWidth || 300;
+        
+        if(canvasHeight === 'parent') context.canvas.height = parent.offsetWidth;
+        else context.canvas.height = canvasHeight || 150;
+        context.fillStyle = backgroundColor;
+			  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+      },
       initDrawingStyle: function(context, lineWidth) {
         context.lineWidth = lineWidth;
+        context.lineJoin = context.lineCap = 'round';
       },
-      draw: function(context, oldX, oldY, oldMidX, oldMidY, newX, newY, curMidX, curMidY) {
+      draw: function(context, oldX, oldY, oldMidX, oldMidY, curMidX, curMidY) {
   			context.beginPath();
   			context.moveTo(curMidX, curMidY);
   			context.quadraticCurveTo(oldX, oldY, oldMidX, oldMidY);
   			context.stroke();
   		},
-      fill: function() {
-        //TODO
+      fill: function(context, eventCoords) {
+    		var img = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+    
+    		// constants identifying pixels components
+    		var INDEX = 0, X = 1, Y = 2, COLOR = 3;
+    
+    		// target color components
+    		var stroke = context.strokeStyle;
+    		var r = parseInt(stroke.substr(1, 2), 16);
+    		var g = parseInt(stroke.substr(3, 2), 16);
+    		var b = parseInt(stroke.substr(5, 2), 16);
+    
+    		// starting point
+    		var start = this._pixelAt(img, parseInt(eventCoords.x, 10), parseInt(eventCoords.y, 10));
+    		var startColor = start[COLOR];
+    		
+    		// no need to continue if starting and target colors are the same
+    		if (this._compareColors(startColor, this._RGBToInt(r, g, b)))
+    			return false;
+    
+    		// pixels to evaluate
+    		var queue = [start];
+    
+    		// loop vars
+    		var pixel, x, y;
+    		var maxX = img.width - 1;
+    		var maxY = img.height - 1;
+    
+    		function updatePixelColor(pixel) {
+    			img.data[pixel[INDEX]] = r;
+    			img.data[pixel[INDEX] + 1] = g;
+    			img.data[pixel[INDEX] + 2] = b;
+    		}
+    
+    		while ((pixel = queue.pop())) {
+    			updatePixelColor(pixel);
+    
+    			if (this._compareColors(pixel[COLOR], startColor)) {
+    				if (pixel[X] > 0) // west
+    					queue.push(this._pixelAt(img, pixel[X] - 1, pixel[Y]));
+    				if (pixel[X] < maxX) // east
+    					queue.push(this._pixelAt(img, pixel[X] + 1, pixel[Y]));
+    				if (pixel[Y] > 0) // north
+    					queue.push(this._pixelAt(img, pixel[X], pixel[Y] - 1));
+    				if (pixel[Y] < maxY) // south
+    					queue.push(this._pixelAt(img, pixel[X], pixel[Y] + 1));
+    			}
+    		}
+    
+    		context.putImageData(img, 0, 0);
+    		return true;
       },
-      clear: function(context) {
-        context.clearRect(0, 0, context.canvas.width, context.canvas.width);
+      clear: function(context, backgroundColor, canvasWidth, canvasHeight, parent) {
+        util.initBackground(context, backgroundColor, canvasWidth, canvasHeight, parent);
       },
       setIMG: function(canvas, context, src) {
         var img = new Image();
@@ -157,6 +227,31 @@
     		if (!this.opts.webStorage || !(this.opts.webStorage === 'session' || this.opts.webStorage === 'local'))
     		  return false;
     		return this.opts.webStorage + 'Storage';
+    	},
+    	_pixelAt: function(img, x, y) {
+    	  var i = (y * img.width + x) * 4;
+      	var c = this._RGBToInt(
+      		img.data[i],
+      		img.data[i + 1],
+          img
+        );
+      
+      	return [
+      		i, // INDEX
+      		x, // X
+      		y, // Y
+      		c  // COLOR
+      	];
+    	},
+    	_compareColors: function(colorOne, colorTwo) {
+    	  return colorOne === colorTwo;
+    	},
+    	_RGBToInt: function(r, g, b) {
+    	  var c = 0;
+      	c |= (r & 255) << 16;
+      	c |= (g & 255) << 8;
+      	c |= (b & 255);
+      	return c;
     	}
     };
     
@@ -171,7 +266,10 @@
         drawingMode: '=drawingmode',
         drawColor: '=drawcolor',
         eraseColor: '=erasecolor',
-        lineWidth: '=linewidth'
+        lineWidth: '=linewidth',
+        backgroundColor: '=backgroundcolor',
+        canvasWidth: '=canvaswidth',
+        canvasHeight: '=canvasheight'
       },
       link: function(scope, element, attrs) {
         scope.canvas = element[0].firstChild;
@@ -181,18 +279,20 @@
         scope.oldX = 0;
         scope.oldY = 0;
         
-        util.initStorage(scope.canvas, scope.webStorage);
+        util.initBackground(scope.context, scope.backgroundColor, scope.canvasWidth, scope.canvasHeight, element.parent()[0]);
         util.initDrawingStyle(scope.context, scope.lineWidth);
+        util.initStorage(scope.canvas, scope.context, scope.webStorage);
         
         scope.remote = angular.extend({
           toDataURL: function(type) {
             return util.toDataURL(scope.canvas, type);
           },
           clear: function() {
-            return util.clear(scope.context);
+            util.clear(scope.context, scope.backgroundColor, scope.canvasWidth, scope.canvasHeight, element.parent()[0]);
+            return util.save(scope.canvas, scope.webStorage);
           },
           clearStorage: function() {
-            return util.clearStorage();
+            return util.clearStorage(scope.canvas, scope.context, scope.webStorage);
           },
           undo: function() {
             return util.undo(scope.canvas, scope.context, scope.webStorage);
@@ -217,6 +317,9 @@
         
         element.bind('mousedown touchstart', function(event) {
           scope.drawing = true;
+          var eventCoords = util._getInputCoords(event, scope.context);
+          scope.oldX = scope.oldMidX = eventCoords.x;
+          scope.oldY = scope.oldMidY = eventCoords.y;
           
           if (scope.drawingMode === 'draw') {
             scope.context.strokeStyle = scope.drawColor;
@@ -225,8 +328,8 @@
             scope.remote.startDraw(event);
           }
           else if (scope.drawingMode === 'fill') {
-            var eventCoords = util._getInputCoords(event, scope.context);
-            util.fill(context, eventCoords);
+            scope.context.strokeStyle = scope.drawColor;
+            util.fill(scope.context, eventCoords);
             
             //callback
             scope.remote.fill(event);
@@ -243,7 +346,7 @@
           scope.drawing = false;
           
           //save state
-          if(scope.webStorage) util.save(scope.canvas, scope.webStorage);
+          if (scope.webStorage) util.save(scope.canvas, scope.webStorage);
           
           //callback
           if (scope.drawingMode === 'draw') scope.remote.endDraw(event);
@@ -253,9 +356,10 @@
         element.bind('mousemove touchmove', function(event) {
           var eventCoords = util._getInputCoords(event, scope.context);
           var curMidCoords = util._getMidCoords(scope.oldX, scope.oldY, eventCoords.x, eventCoords.y);
+          //var curMidCoords = util._getMidCoords(eventCoords.x, eventCoords.y, eventCoords.x, eventCoords.y);
         
           if (scope.drawing === true) {
-            util.draw(scope.context, scope.oldX, scope.oldY, scope.oldMidX, scope.oldMidY, eventCoords.x, eventCoords.y, curMidCoords.x, curMidCoords.y);
+            util.draw(scope.context, scope.oldX, scope.oldY, scope.oldMidX, scope.oldMidY, curMidCoords.x, curMidCoords.y);
             
             //callback
             if (scope.drawingMode === 'draw') {
@@ -280,13 +384,12 @@
             //save state
             if(scope.webStorage) util.save(scope.canvas, scope.webStorage);
             
+            //callback
             if (scope.drawingMode === 'draw') {
               scope.remote.endDraw(event);
-              scope.drawing = false;
             }
             else if (scope.drawingMode === 'eraser'){
               scope.remote.endErase(event);
-              scope.drawing = false;
             }
           }
         });

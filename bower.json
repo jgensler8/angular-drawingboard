@@ -5,7 +5,7 @@
   "authors": [
     "Jeffrey Gensler <jgensler8@gmail.com>"
   ],
-  "description": "port of drawingboard.js to angular",
+  "description": "port of drawingboard.js to angular. session or local storage options.",
   "main": "js/ng-drawingboard.js",
   "keywords": [
     "angular",
