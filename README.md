@@ -66,7 +66,7 @@ control basic abilities of the canvas
 ```
 
 ####`remote`
-event hooks. Hopefully this will give a way of balancing complex scope patterns with functions that will typically be linked up to buttons anyway. This is likely to change in the future but the idea is to leave as much "ui-rigging" up to the consumer as possible.
+event hooks. I am not quite sure what this might be useful for but I have added it if the need arises.
 
 ```javascript
 //remoteObj =
