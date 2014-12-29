@@ -17,37 +17,37 @@
     
     var util = {
       //canvas related
-      toDataURL: function(canvas, type) {
-        return canvas.toDataURL(type);
+      toDataURL: function(context, type) {
+        return context.canvas.toDataURL(type);
       },
       
       //storage related
-      initStorage: function(canvas, context, webStorage) {
-        var id = canvas.id || 'tempID';
+      initStorage: function(context, webStorage) {
+        var id = context.canvas.id || 'tempID';
         //if the user decides they need storage later
         if (webStorage === 'session') {
           if ($sessionStorage[id]) {
-            this.setIMG(canvas, context, $sessionStorage[id][$sessionStorage[id].length - 1]);
+            this.setIMG(context, $sessionStorage[id][$sessionStorage[id].length - 1]);
             currentImageIndex = $sessionStorage[id].length - 1;
           }
           else {
             $sessionStorage[id] = [];
-            this.save(canvas, webStorage);
+            this.save(context, webStorage);
           }
         }
         else if (webStorage === 'local') {
           if ($localStorage[id]) {
-            this.setIMG(canvas, context, $localStorage[id][$localStorage[id].length - 1]);
+            this.setIMG(context, $localStorage[id][$localStorage[id].length - 1]);
             currentImageIndex = $localStorage[id].length - 1;
           }
           else {
             $localStorage[id] = [];
-            this.save(canvas, webStorage);
+            this.save(context, webStorage);
           }
         }
       },
-      save: function(canvas, webStorage) {
-        var id = canvas.id || 'tempID';
+      save: function(context, webStorage) {
+        var id = context.canvas.id || 'tempID';
         
         if ( webStorage === 'session') {
           //if we are in the middle of the history
@@ -55,9 +55,7 @@
             $sessionStorage[id].splice(currentImageIndex + 1, $sessionStorage[id].length - currentImageIndex);
             
           currentImageIndex = $sessionStorage[id].length;
-          var history = $sessionStorage[id];
-          history.push(this.toDataURL(canvas, 'image/png'));
-          $sessionStorage[id] = history;
+          $sessionStorage[id].push(this.toDataURL(context, 'image/png'));
         }
         else if ( webStorage === 'local') {
           //if we are in the middle of the history
@@ -65,42 +63,50 @@
             $localStorage[id].splice(currentImageIndex + 1, $localStorage[id].length - currentImageIndex);
             
           currentImageIndex = $localStorage[id].length;
-          $localStorage[id].push(this.toDataURL(canvas, 'image/png'));
+          $localStorage[id].push(this.toDataURL(context, 'image/png'));
         }
       },
-      undo: function(canvas, context, webStorage) {
+      undo: function(context, webStorage) {
         if(currentImageIndex <= 0) return false;
-        var id = canvas.id || 'tempID';
+        var id = context.canvas.id || 'tempID';
         
         if ( webStorage === 'session') {
           --currentImageIndex;
-          this.setIMG(canvas, context, $sessionStorage[id][currentImageIndex]);
+          this.setIMG(context, $sessionStorage[id][currentImageIndex]);
         }
         else if ( webStorage === 'local') {
           --currentImageIndex;
-          this.setIMG(canvas, context, $localStorage[id][currentImageIndex]);
+          this.setIMG(context, $localStorage[id][currentImageIndex]);
         }
         return true;
       },
-      redo: function(canvas, context, webStorage) {
-        var id = canvas.id || 'tempID';
+      redo: function(context, webStorage) {
+        var id = context.canvas.id || 'tempID';
         
         if ( webStorage === 'session') {
           if(currentImageIndex + 1 >= $sessionStorage[id].length) return false;
-          
+          console.log("increasing");
           ++currentImageIndex;
-          this.setIMG(canvas, context, $sessionStorage[id][currentImageIndex]);
+          this.setIMG(context, $sessionStorage[id][currentImageIndex]);
         }
         else if ( webStorage === 'local') {
           if(currentImageIndex + 1 >= $localStorage[id].length) return false;
           
           ++currentImageIndex;
-          this.setIMG(canvas, context, $localStorage[id][currentImageIndex]);
+          this.setIMG(context, $localStorage[id][currentImageIndex]);
         }
         return true;
       },
-      clearStorage: function(canvas, context, webStorage) {
-        return this.initStorage(canvas, context, webStorage);
+      clearStorage: function(context, webStorage) {
+        var id = context.canvas.id || 'tempID';
+        
+        if ( webStorage === 'session') {
+          $sessionStorage[id] = undefined;
+        }
+        else if ( webStorage === 'local') {
+          $localStorage[id] = undefined;
+        }
+        return this.initStorage(context, webStorage);
       },
       
       //drawing related
@@ -178,12 +184,12 @@
       clear: function(context, backgroundColor, canvasWidth, canvasHeight, parent) {
         util.initBackground(context, backgroundColor, canvasWidth, canvasHeight, parent);
       },
-      setIMG: function(canvas, context, src) {
+      setIMG: function(context, src) {
         var img = new Image();
     		var oldGCO = context.globalCompositeOperation;
     		img.onload = function() {
     			context.globalCompositeOperation = "source-over";
-    			context.clearRect(0, 0, canvas.width, canvas.height);
+    			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     			context.drawImage(img, 0, 0);
     
     /*
@@ -281,24 +287,24 @@
         
         util.initBackground(scope.context, scope.backgroundColor, scope.canvasWidth, scope.canvasHeight, element.parent()[0]);
         util.initDrawingStyle(scope.context, scope.lineWidth);
-        util.initStorage(scope.canvas, scope.context, scope.webStorage);
+        util.initStorage(scope.context, scope.webStorage);
         
         scope.remote = angular.extend({
           toDataURL: function(type) {
-            return util.toDataURL(scope.canvas, type);
+            return util.toDataURL(scope.context, type);
           },
           clear: function() {
             util.clear(scope.context, scope.backgroundColor, scope.canvasWidth, scope.canvasHeight, element.parent()[0]);
-            return util.save(scope.canvas, scope.webStorage);
+            return util.save(scope.context, scope.webStorage);
           },
           clearStorage: function() {
-            return util.clearStorage(scope.canvas, scope.context, scope.webStorage);
+            return util.clearStorage(scope.context, scope.webStorage);
           },
           undo: function() {
-            return util.undo(scope.canvas, scope.context, scope.webStorage);
+            return util.undo(scope.context, scope.webStorage);
           },
           redo: function() {
-            return util.redo(scope.canvas, scope.context, scope.webStorage);
+            return util.redo(scope.context, scope.webStorage);
           },
           startDraw: function(){},
           endDraw: function(){},
@@ -346,7 +352,7 @@
           scope.drawing = false;
           
           //save state
-          if (scope.webStorage) util.save(scope.canvas, scope.webStorage);
+          if (scope.webStorage) util.save(scope.context, scope.webStorage);
           
           //callback
           if (scope.drawingMode === 'draw') scope.remote.endDraw(event);
@@ -382,7 +388,7 @@
             scope.drawing = false;
             
             //save state
-            if(scope.webStorage) util.save(scope.canvas, scope.webStorage);
+            if(scope.webStorage) util.save(scope.context, scope.webStorage);
             
             //callback
             if (scope.drawingMode === 'draw') {

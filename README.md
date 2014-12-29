@@ -85,5 +85,5 @@ event hooks. Hopefully this will give a way of balancing complex scope patterns 
 
 ###Version History
 
-v0.2.0 - basic usage: colors, width, storage, drawing modes
-v0.1.0 - basic usage. storage not rigged up.
+- v0.2.0 - basic usage: colors, width, storage, drawing modes
+- v0.1.0 - basic usage. storage not rigged up.
