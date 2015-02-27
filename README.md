@@ -7,12 +7,16 @@ Some modifications and reworkings to [drawingboard.js](https://github.com/Leimi/
 Template:
 
 ```html
+<!-- make sure to include both *ngStorage* and *angular-drawingboard* as script src-->
+
 <ng-drawingboard remote="drawingboardRemote" drawingMode="drawingMode" eraseColor="eraseColor" drawColor="drawColor" lineWidth="lineWidth" webStorage="webStorage" backgroundColor="backgroundColor"></ng-drawingboard>
 ```
 
-Controller:
+Application:
 
 ```javascript
+var app = angular.module('testApp', ['ng-drawingboard']);
+
 app.controller('appCtrl', ['$scope', function($scope) {
   $scope.drawingModes = ['draw', 'eraser', 'fill'];
   $scope.webStorage = 'session';
